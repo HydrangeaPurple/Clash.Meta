@@ -46,7 +46,7 @@ func parseProxyName(next http.Handler) http.Handler {
 func findProxyByName(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		name := r.Context().Value(CtxKeyProxyName).(string)
-		proxies := tunnel.ProxiesWithProviders()
+		proxies := tunnel.Proxies()
 		proxy, exist := proxies[name]
 		if !exist {
 			render.Status(r, http.StatusNotFound)
@@ -60,7 +60,7 @@ func findProxyByName(next http.Handler) http.Handler {
 }
 
 func getProxies(w http.ResponseWriter, r *http.Request) {
-	proxies := tunnel.ProxiesWithProviders()
+	proxies := tunnel.Proxies()
 	render.JSON(w, r, render.M{
 		"proxies": proxies,
 	})
