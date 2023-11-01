@@ -8,7 +8,6 @@ import (
 	"net/netip"
 	"strings"
 
-	"github.com/Dreamacro/clash/common/atomic"
 	"github.com/Dreamacro/clash/component/ca"
 	"github.com/Dreamacro/clash/component/dialer"
 	"github.com/Dreamacro/clash/component/resolver"
@@ -23,7 +22,7 @@ type client struct {
 	r            *Resolver
 	port         string
 	host         string
-	iface        atomic.TypedValue[string]
+	iface        string
 	proxyAdapter C.ProxyAdapter
 	proxyName    string
 	addr         string
@@ -46,10 +45,6 @@ func (c *client) Address() string {
 
 	c.addr = fmt.Sprintf("%s://%s", schema, net.JoinHostPort(c.host, c.port))
 	return c.addr
-}
-
-func (c *client) Exchange(m *D.Msg) (*D.Msg, error) {
-	return c.ExchangeContext(context.Background(), m)
 }
 
 func (c *client) ExchangeContext(ctx context.Context, m *D.Msg) (*D.Msg, error) {
@@ -78,8 +73,8 @@ func (c *client) ExchangeContext(ctx context.Context, m *D.Msg) (*D.Msg, error) 
 	}
 
 	var options []dialer.Option
-	if c.iface.Load() != "" {
-		options = append(options, dialer.WithInterface(c.iface.Load()))
+	if c.iface != "" {
+		options = append(options, dialer.WithInterface(c.iface))
 	}
 
 	conn, err := getDialHandler(c.r, c.proxyAdapter, c.proxyName, options...)(ctx, network, net.JoinHostPort(ip.String(), c.port))
